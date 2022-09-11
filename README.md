@@ -1,4 +1,4 @@
-# Template Repository Name
+# 8 Puzzle AI ALGORITHM
 
 > Resume of application here
 
