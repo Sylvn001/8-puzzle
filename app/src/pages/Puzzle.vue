@@ -78,6 +78,7 @@
 <script>
 import { defineComponent } from "vue";
 import History from "./History.vue";
+import Fila from "../helpers/fila.js"
 
 export default defineComponent({
   components: { History },
@@ -140,13 +141,142 @@ export default defineComponent({
       this.order = newOrder;
     },
     solve() {
-      if (this.searchMethod == 1) {
-        //logica da A* aqui
-      } else {
-        // logica da Largura aqui
+      let resultado;
+      let inicio = this.userValue;
+      let solucao = "";
+
+      for(i = 0; i < 9; i++)
+      {
+        solucao = solucao+this.order[i];
       }
+      if (this.searchMethod == 1) {
+        let filaCPrio = new Fila();
+        filaCPrio.enqueue(inicio, 0, 0, [inicio], solucao, -1);
+        resultado = this.AEstrela(filaCPrio);
+      } else {
+        let filaSPrio = new Fila();
+        filaSPrio.enqueueSPrio(inicio, [inicio], solucao, -1);
+        resultado = this.buscaCega(filaSPrio);
+      }
+      
       this.solved = true;
     },
+    AEstrela(fila) {
+      let flag = false;
+      let valor;
+      while(!fila.empty() && !flag)
+      {
+          valor = fila.dequeue();
+          let posZero = valor.atual.indexOf("0");
+          flag = resolvido(valor);
+          if(!flag){
+              let passos = possibilidades(posZero);
+
+              for(let pos of passos)
+              {
+                  if(valor.last != valor.atual.charAt(pos)){
+                      let novo = valor.atual;
+                      let aux = novo.charAt(pos);
+                      novo = novo.replace("0", "r");
+                      novo = novo.replace(aux, "0");
+                      novo = novo.replace("r", aux);
+                      let fa = calculaManhatam(novo, valor.solucao);
+                      let auxHisto = [...valor.historico]
+                      auxHisto.push(novo);
+                      let prio = fa + valor.movimentos +1;
+                      fila.enqueue(novo, prio, valor.movimentos+1, auxHisto, valor.solucao, aux);
+                  }
+              }
+          }
+      }
+      return valor;
+    },
+    possibilidades(index) {
+      if(index == 0)
+        return [1,3];
+      if(index == 1)
+        return [0,2,4];
+      if(index == 2)
+        return [1,5];
+      if(index == 3)
+        return [0,4,6];
+      if(index == 4)
+        return [1,3,5,7];
+      if(index == 5)
+        return [2,4,8];
+      if(index == 6)
+        return [3,7];
+      if(index == 7)
+        return [4,6,8];
+      if(index == 8)
+        return [5,7];
+    },
+    buscaCega(fila)
+    {
+      let flag = false;
+      let valor;
+      while(!fila.empty() && !flag)
+      {
+          valor = fila.dequeue();
+          let posZero = valor.atual.indexOf("0");
+          flag = resolvido(valor);
+          if(!flag){
+              let passos = possibilidades(posZero);
+
+              for(let pos of passos)
+              {
+                  if(valor.last != valor.atual.charAt(pos)){
+                      let novo = valor.atual;
+                      let aux = novo.charAt(pos);
+                      novo = novo.replace("0", "r");
+                      novo = novo.replace(aux, "0");
+                      novo = novo.replace("r", aux);
+                      let auxHisto = [...valor.historico]
+                      auxHisto.push(novo);
+                      fila.enqueueSPrio(novo, auxHisto, valor.solucao, aux);
+                  }
+              }
+          }
+      }
+      return valor;
+    },
+    resolvido(valor)
+    {
+      if(valor.atual === valor.solucao)
+        return true;
+      return false;
+    },
+    calculaManhatam(aux, resolvido)
+    {
+      let valor = 0;
+      let matrizNovo = [
+          [aux[0], aux[1], aux[2]],
+          [aux[3], aux[4], aux[5]],
+          [aux[6], aux[7], aux[8]]
+      ];
+      let matrizResolvido = [
+          [resolvido[0], resolvido[1], resolvido[2]],
+          [resolvido[3], resolvido[4], resolvido[5]],
+          [resolvido[6], resolvido[7], resolvido[8]]
+      ];
+
+      for(let i = 0; i < 3; i++)
+      {
+          for(let j = 0; j < 3; j ++){
+              let pos = [];
+              for(let a = 0; a < 3; a++)
+              {
+                  for(let b = 0; b < 3; b ++){
+                      if(matrizResolvido[a][b] == matrizNovo[i][j])
+                          pos = [a,b];
+                  }
+              }
+
+              valor += Math.abs(i - pos[0]) + Math.abs(j - pos[1]);
+          }
+      }
+      return valor;
+    }
   },
   watch: {
     searchMethod() {
