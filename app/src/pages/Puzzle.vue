@@ -29,7 +29,7 @@
         </div>
         <div class="col">
           <button class="btn btn-success mt-1 mb-1 mx-1" @click="setOrder">
-            Embaralhar
+            Definir Final
           </button>
           <button class="btn btn-danger mt-1 mb-1 mx-1" @click="randomize">
             <svg
@@ -78,7 +78,7 @@
 <script>
 import { defineComponent } from "vue";
 import History from "./History.vue";
-import Fila from "../helpers/fila.js"
+import Fila from "../helpers/fila.js";
 
 export default defineComponent({
   components: { History },
@@ -93,20 +93,7 @@ export default defineComponent({
       userValue: "012345678",
       error: false,
       success: false,
-      historyData: [
-        [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [1, 0, 2, 3, 4, 5, 6, 7, 8],
-        [1, 2, 0, 3, 4, 5, 6, 7, 8],
-        [1, 2, 3, 0, 4, 5, 6, 7, 8],
-        [1, 2, 3, 4, 0, 5, 6, 7, 8],
-        [1, 2, 3, 4, 5, 0, 6, 7, 8],
-        [0, 1, 2, 3, 4, 5, 6, 7, 8],
-        [1, 0, 2, 3, 4, 5, 6, 7, 8],
-        [1, 2, 0, 3, 4, 5, 6, 7, 8],
-        [1, 2, 3, 0, 4, 5, 6, 7, 8],
-        [1, 2, 3, 4, 0, 5, 6, 7, 8],
-        [1, 2, 3, 4, 5, 0, 6, 7, 8],
-      ],
+      historyData: [[]],
       solved: false,
     };
   },
@@ -130,153 +117,193 @@ export default defineComponent({
       }
     },
     randomize() {
-      let newOrder = [];
-      while (newOrder.length != 9) {
-        let pos = Math.ceil(Math.random() * (9 - 0) - 1);
+      //let newOrder = [];
 
-        if (!newOrder.includes(pos)) {
-          newOrder.push(pos);
-        }
+      let final = this.userValue;
+      for (let i = 0; i < 45; i++) {
+        let posZero = final.indexOf("0");
+        let mov = this.possibilidades(posZero);
+        console.log(mov);
+        let rand = Math.ceil(Math.random() * mov.length - 1);
+        console.log(rand);
+        let aux = final.charAt(mov[rand]);
+        final = final.replace("0", "r");
+        final = final.replace(aux, "0");
+        final = final.replace("r", aux);
       }
-      this.order = newOrder;
+      this.order = final.split("");
     },
     solve() {
+      this.historyData = [];
       let resultado;
-      let inicio = this.userValue;
-      let solucao = "";
+      let solucao = this.userValue;
+      let inicio = "";
 
-      for(i = 0; i < 9; i++)
-      {
-        solucao = solucao+this.order[i];
+      for (let i = 0; i < 9; i++) {
+        inicio = inicio + this.order[i];
       }
       if (this.searchMethod == 1) {
         let filaCPrio = new Fila();
         filaCPrio.enqueue(inicio, 0, 0, [inicio], solucao, -1);
-        resultado = this.AEstrela(filaCPrio);
+        if (this.searchMethod == "1") resultado = this.AEstrelaUm(filaCPrio);
+        else resultado = this.AEstrelaDois(filaCPrio);
       } else {
         let filaSPrio = new Fila();
         filaSPrio.enqueueSPrio(inicio, [inicio], solucao, -1);
         resultado = this.buscaCega(filaSPrio);
       }
-      
+
       this.solved = true;
+      this.historyData = resultado.historico;
     },
-    AEstrela(fila) {
+    AEstrelaUm(fila) {
       let flag = false;
       let valor;
-      while(!fila.empty() && !flag)
-      {
-          valor = fila.dequeue();
-          let posZero = valor.atual.indexOf("0");
-          flag = resolvido(valor);
-          if(!flag){
-              let passos = possibilidades(posZero);
+      while (!fila.empty() && !flag) {
+        valor = fila.dequeue();
+        let posZero = valor.atual.indexOf("0");
+        flag = this.resolvido(valor);
+        if (!flag) {
+          let passos = this.possibilidades(posZero);
 
-              for(let pos of passos)
-              {
-                  if(valor.last != valor.atual.charAt(pos)){
-                      let novo = valor.atual;
-                      let aux = novo.charAt(pos);
-                      novo = novo.replace("0", "r");
-                      novo = novo.replace(aux, "0");
-                      novo = novo.replace("r", aux);
-                      let fa = calculaManhatam(novo, valor.solucao);
-                      let auxHisto = [...valor.historico]
-                      auxHisto.push(novo);
-                      let prio = fa + valor.movimentos +1;
-                      fila.enqueue(novo, prio, valor.movimentos+1, auxHisto, valor.solucao, aux);
-                  }
-              }
+          for (let pos of passos) {
+            if (valor.last != valor.atual.charAt(pos)) {
+              let novo = valor.atual;
+              let aux = novo.charAt(pos);
+              novo = novo.replace("0", "r");
+              novo = novo.replace(aux, "0");
+              novo = novo.replace("r", aux);
+              let fa = this.calculaManhatam(novo, valor.solucao);
+              let auxHisto = [...valor.historico];
+              auxHisto.push(novo);
+              let prio = fa + valor.movimentos + 1;
+              fila.enqueue(
+                novo,
+                prio,
+                valor.movimentos + 1,
+                auxHisto,
+                valor.solucao,
+                aux
+              );
+            }
           }
+        }
+      }
+      return valor;
+    },
+    AEstrelaDois(fila) {
+      let flag = false;
+      let valor;
+      while (!fila.empty() && !flag) {
+        valor = fila.dequeue();
+        let posZero = valor.atual.indexOf("0");
+        flag = this.resolvido(valor);
+        if (!flag) {
+          let passos = this.possibilidades(posZero);
+
+          for (let pos of passos) {
+            if (valor.last != valor.atual.charAt(pos)) {
+              let novo = valor.atual;
+              let aux = novo.charAt(pos);
+              novo = novo.replace("0", "r");
+              novo = novo.replace(aux, "0");
+              novo = novo.replace("r", aux);
+              let posFilhos = this.possibilidades(novo.indexOf("0"));
+              let fa = -1;
+              for (let i of posFilhos) {
+                let charFilho = novo.charAt(i);
+                let novoFilho = novo.replace("0", "r");
+                novoFilho = novoFilho.replace(charFilho, "0");
+                novoFilho = novoFilho.replace("r", charFilho);
+                let auxFilho = this.calculaManhatam(novoFilho, valor.solucao);
+
+                if (fa == -1 || auxFilho < fa) fa = auxFilho;
+              }
+              let auxHisto = [...valor.historico];
+              auxHisto.push(novo);
+              let prio = fa + valor.movimentos + 1;
+              fila.enqueue(
+                novo,
+                prio,
+                valor.movimentos + 1,
+                auxHisto,
+                valor.solucao,
+                aux
+              );
+            }
+          }
+        }
       }
       return valor;
     },
     possibilidades(index) {
-      if(index == 0)
-        return [1,3];
-      if(index == 1)
-        return [0,2,4];
-      if(index == 2)
-        return [1,5];
-      if(index == 3)
-        return [0,4,6];
-      if(index == 4)
-        return [1,3,5,7];
-      if(index == 5)
-        return [2,4,8];
-      if(index == 6)
-        return [3,7];
-      if(index == 7)
-        return [4,6,8];
-      if(index == 8)
-        return [5,7];
+      if (index == 0) return [1, 3];
+      if (index == 1) return [0, 2, 4];
+      if (index == 2) return [1, 5];
+      if (index == 3) return [0, 4, 6];
+      if (index == 4) return [1, 3, 5, 7];
+      if (index == 5) return [2, 4, 8];
+      if (index == 6) return [3, 7];
+      if (index == 7) return [4, 6, 8];
+      if (index == 8) return [5, 7];
     },
-    buscaCega(fila)
-    {
+    buscaCega(fila) {
       let flag = false;
       let valor;
-      while(!fila.empty() && !flag)
-      {
-          valor = fila.dequeue();
-          let posZero = valor.atual.indexOf("0");
-          flag = resolvido(valor);
-          if(!flag){
-              let passos = possibilidades(posZero);
+      while (!fila.empty() && !flag) {
+        valor = fila.dequeue();
+        let posZero = valor.atual.indexOf("0");
+        flag = this.resolvido(valor);
+        if (!flag) {
+          let passos = this.possibilidades(posZero);
 
-              for(let pos of passos)
-              {
-                  if(valor.last != valor.atual.charAt(pos)){
-                      let novo = valor.atual;
-                      let aux = novo.charAt(pos);
-                      novo = novo.replace("0", "r");
-                      novo = novo.replace(aux, "0");
-                      novo = novo.replace("r", aux);
-                      let auxHisto = [...valor.historico]
-                      auxHisto.push(novo);
-                      fila.enqueueSPrio(novo, auxHisto, valor.solucao, aux);
-                  }
-              }
+          for (let pos of passos) {
+            if (valor.last != valor.atual.charAt(pos)) {
+              let novo = valor.atual;
+              let aux = novo.charAt(pos);
+              novo = novo.replace("0", "r");
+              novo = novo.replace(aux, "0");
+              novo = novo.replace("r", aux);
+              let auxHisto = [...valor.historico];
+              auxHisto.push(novo);
+              fila.enqueueSPrio(novo, auxHisto, valor.solucao, aux);
+            }
           }
+        }
       }
       return valor;
     },
-    resolvido(valor)
-    {
-      if(valor.atual === valor.solucao)
-        return true;
+    resolvido(valor) {
+      if (valor.atual === valor.solucao) return true;
       return false;
     },
-    calculaManhatam(aux, resolvido)
-    {
+    calculaManhatam(aux, resolvido) {
       let valor = 0;
       let matrizNovo = [
-          [aux[0], aux[1], aux[2]],
-          [aux[3], aux[4], aux[5]],
-          [aux[6], aux[7], aux[8]]
+        [aux[0], aux[1], aux[2]],
+        [aux[3], aux[4], aux[5]],
+        [aux[6], aux[7], aux[8]],
       ];
       let matrizResolvido = [
-          [resolvido[0], resolvido[1], resolvido[2]],
-          [resolvido[3], resolvido[4], resolvido[5]],
-          [resolvido[6], resolvido[7], resolvido[8]]
+        [resolvido[0], resolvido[1], resolvido[2]],
+        [resolvido[3], resolvido[4], resolvido[5]],
+        [resolvido[6], resolvido[7], resolvido[8]],
       ];
 
-      for(let i = 0; i < 3; i++)
-      {
-          for(let j = 0; j < 3; j ++){
-              let pos = [];
-              for(let a = 0; a < 3; a++)
-              {
-                  for(let b = 0; b < 3; b ++){
-                      if(matrizResolvido[a][b] == matrizNovo[i][j])
-                          pos = [a,b];
-                  }
-              }
-
-              valor += Math.abs(i - pos[0]) + Math.abs(j - pos[1]);
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          let pos = [];
+          for (let a = 0; a < 3; a++) {
+            for (let b = 0; b < 3; b++) {
+              if (matrizResolvido[a][b] == matrizNovo[i][j]) pos = [a, b];
+            }
           }
+
+          valor += Math.abs(i - pos[0]) + Math.abs(j - pos[1]);
+        }
       }
       return valor;
-    }
+    },
   },
   watch: {
     searchMethod() {
