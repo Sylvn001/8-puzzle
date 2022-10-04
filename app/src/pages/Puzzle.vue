@@ -70,7 +70,19 @@
       <aside>
         <h2>Historico</h2>
       </aside>
-      <history v-if="solved" :historyArray="historyData" />
+      <div
+        v-if="this.loading"
+        class="spinner-border text-success def"
+        role="status"
+      >
+        <span class="visually-hidden">Loading</span>
+      </div>
+      <history
+        v-if="this.solved"
+        :historyArray="historyData"
+        :tempoEx="tempoEx"
+        :tamCaminho="this.tamCaminho"
+      />
     </div>
   </main>
 </template>
@@ -93,8 +105,11 @@ export default defineComponent({
       userValue: "012345678",
       error: false,
       success: false,
-      historyData: [[]],
+      historyData: [],
       solved: false,
+      loading: false,
+      tempoEx: "",
+      tamCaminho: 0,
     };
   },
   methods: {
@@ -117,15 +132,11 @@ export default defineComponent({
       }
     },
     randomize() {
-      //let newOrder = [];
-
       let final = this.userValue;
       for (let i = 0; i < 45; i++) {
         let posZero = final.indexOf("0");
         let mov = this.possibilidades(posZero);
-        console.log(mov);
         let rand = Math.ceil(Math.random() * mov.length - 1);
-        console.log(rand);
         let aux = final.charAt(mov[rand]);
         final = final.replace("0", "r");
         final = final.replace(aux, "0");
@@ -134,10 +145,13 @@ export default defineComponent({
       this.order = final.split("");
     },
     solve() {
+      this.loading = true;
+      this.solved = false;
       this.historyData = [];
       let resultado;
       let solucao = this.userValue;
       let inicio = "";
+      let horaInicio = new Date().getTime();
 
       for (let i = 0; i < 9; i++) {
         inicio = inicio + this.order[i];
@@ -145,7 +159,7 @@ export default defineComponent({
       if (this.searchMethod == 1) {
         let filaCPrio = new Fila();
         filaCPrio.enqueue(inicio, 0, 0, [inicio], solucao, -1);
-        if (this.searchMethod == "1") resultado = this.AEstrelaUm(filaCPrio);
+        if (this.depth == "1") resultado = this.AEstrelaUm(filaCPrio);
         else resultado = this.AEstrelaDois(filaCPrio);
       } else {
         let filaSPrio = new Fila();
@@ -153,8 +167,16 @@ export default defineComponent({
         resultado = this.buscaCega(filaSPrio);
       }
 
+      let horaFim = new Date().getTime();
       this.solved = true;
+      this.loading = false;
+
       this.historyData = resultado.historico;
+
+      let tempo = horaFim - horaInicio;
+      this.tempoEx = `${Math.floor(tempo / 60000)}:${Math.floor(
+        (tempo % 60000) / 1000
+      )}:${Math.floor((tempo % 60000) % 1000)}`;
     },
     AEstrelaUm(fila) {
       let flag = false;
@@ -353,5 +375,15 @@ export default defineComponent({
 .aside {
   background: #232323;
   border-radius: 10px;
+}
+
+.def {
+  position: relative;
+  display: flex;
+  top: 5%;
+  left: 27%;
+  width: 450px;
+  height: 450px;
+  opacity: 50%;
 }
 </style>

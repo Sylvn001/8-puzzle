@@ -1,5 +1,10 @@
 <template>
   <div class="historyContainer">
+    <div class="data-history">
+      <div class="data-setup">Tempo Gasto: {{ tempoEx }}</div>
+      <div class="data-setup">Passos: {{ historyArray.length - 1 }}</div>
+      <div class="data-setup">Tam caminho: {{ tamCaminho }}</div>
+    </div>
     <div class="historyBox">
       <div
         class="historyCard"
@@ -28,6 +33,8 @@ import { defineComponent } from "vue";
 export default defineComponent({
   props: {
     historyArray: [],
+    tempoEx: String,
+    tamCaminho: Number,
   },
   name: "HistoryComponent",
 });
@@ -80,5 +87,15 @@ export default defineComponent({
 }
 .puzzle-active {
   background: #157347;
+}
+.data-history {
+  display: flex;
+}
+.data-setup {
+  background: #333333;
+  width: 200px;
+  height: 2rem;
+  margin: 0.8rem 0.5rem 0.8rem 0;
+  border-radius: 10px;
 }
 </style>
