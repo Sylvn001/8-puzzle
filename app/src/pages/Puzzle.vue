@@ -145,6 +145,7 @@ export default defineComponent({
       this.order = final.split("");
     },
     solve() {
+      this.tamCaminho = 0;
       this.loading = true;
       this.solved = false;
       this.historyData = [];
@@ -183,6 +184,7 @@ export default defineComponent({
       let valor;
       while (!fila.empty() && !flag) {
         valor = fila.dequeue();
+        this.tamCaminho++;
         let posZero = valor.atual.indexOf("0");
         flag = this.resolvido(valor);
         if (!flag) {
