@@ -305,8 +305,7 @@ export default defineComponent({
       let valor = 0;
 
       for (let i = 0; i < 9; i++) {
-        if(aux[i] !== resolvido[i])
-          valor++;
+        if (aux[i] !== resolvido[i]) valor++;
       }
       return valor;
     },
