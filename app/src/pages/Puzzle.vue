@@ -303,28 +303,10 @@ export default defineComponent({
     },
     calculaManhatam(aux, resolvido) {
       let valor = 0;
-      let matrizNovo = [
-        [aux[0], aux[1], aux[2]],
-        [aux[3], aux[4], aux[5]],
-        [aux[6], aux[7], aux[8]],
-      ];
-      let matrizResolvido = [
-        [resolvido[0], resolvido[1], resolvido[2]],
-        [resolvido[3], resolvido[4], resolvido[5]],
-        [resolvido[6], resolvido[7], resolvido[8]],
-      ];
 
-      for (let i = 0; i < 3; i++) {
-        for (let j = 0; j < 3; j++) {
-          let pos = [];
-          for (let a = 0; a < 3; a++) {
-            for (let b = 0; b < 3; b++) {
-              if (matrizResolvido[a][b] == matrizNovo[i][j]) pos = [a, b];
-            }
-          }
-
-          valor += Math.abs(i - pos[0]) + Math.abs(j - pos[1]);
-        }
+      for (let i = 0; i < 9; i++) {
+        if(aux[i] !== resolvido[i])
+          valor++;
       }
       return valor;
     },
