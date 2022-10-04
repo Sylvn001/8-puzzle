@@ -220,6 +220,7 @@ export default defineComponent({
       let valor;
       while (!fila.empty() && !flag) {
         valor = fila.dequeue();
+        this.tamCaminho++;
         let posZero = valor.atual.indexOf("0");
         flag = this.resolvido(valor);
         if (!flag) {
@@ -276,6 +277,7 @@ export default defineComponent({
       let valor;
       while (!fila.empty() && !flag) {
         valor = fila.dequeue();
+        this.tamCaminho++;
         let posZero = valor.atual.indexOf("0");
         flag = this.resolvido(valor);
         if (!flag) {
