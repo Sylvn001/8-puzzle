@@ -17,7 +17,7 @@
           </select>
         </div>
         <div class="col-3">
-          <label for="algoritimo" class="form-label">ordem</label>
+          <label for="algoritimo" class="form-label">Ordem</label>
           <input
             v-model="userValue"
             type="text"
@@ -68,7 +68,7 @@
     </section>
     <div class="col-6 aside">
       <aside>
-        <h2>Hístorico</h2>
+        <h2>Hitórico</h2>
       </aside>
       <div
         v-if="this.loading"
