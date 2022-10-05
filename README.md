@@ -21,9 +21,14 @@
 ## 💻 Project
 8-Puzzle developed by Junior Barros & Gabriel Pellin 
 
+## Dependencies 
+- [Node](https://nodejs.dev/en/)
+- [Yarn](https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable)
+
 ## 🚀 How start
+
 - Open "App" Directory in VsCode
-- In terminal RUN commands `yarn` or `npm run install`
+- In terminal RUN commands `yarn`
 - Start web server in localhost using `yarn serve`
 
 ## 🕸️ Test in WEB
