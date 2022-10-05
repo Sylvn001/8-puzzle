@@ -68,7 +68,7 @@
     </section>
     <div class="col-6 aside">
       <aside>
-        <h2>Historico</h2>
+        <h2>Hístorico</h2>
       </aside>
       <div
         v-if="this.loading"
